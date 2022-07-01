@@ -1,10 +1,17 @@
 import { useAppDispatch, useAppSelector } from "../hooks/useRedux";
 import CartItem from "./CartItem";
-import { clearCart } from "../redux/feature/cart/cartSlice";
+import { clearCart, calcTotal } from "../redux/feature/cart/cartSlice";
+import { useEffect } from "react";
 
 const CartContainer = () => {
   const dispatch = useAppDispatch();
   const { cartItems, total, amount } = useAppSelector((store) => store.cart);
+
+  useEffect(() => {
+    dispatch(calcTotal());
+
+    console.log(cartItems);
+  }, [cartItems, dispatch]);
 
   if (amount < 1) {
     return (
@@ -16,6 +23,7 @@ const CartContainer = () => {
       </section>
     );
   }
+
   return (
     <section className="cart">
       <header>
