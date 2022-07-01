@@ -1,7 +1,10 @@
-import { createSlice, current } from "@reduxjs/toolkit";
-import { RootState } from "../../store";
-import cartItems from "../../../mock/data/cartItems";
-import { CartItem } from "../../../interface/cartItem";
+import { createAsyncThunk, createSlice } from '@reduxjs/toolkit';
+import { RootState } from '../../store';
+import { CartItem } from '../../../interface/cartItem';
+import axios from 'axios';
+import { toggleModal } from '../modal/modalSlice';
+
+const url = 'https://course-api.com/react-useReducer-cart-project';
 
 interface CartState {
   cartItems: CartItem[];
@@ -10,15 +13,32 @@ interface CartState {
   isLoading: boolean;
 }
 
+export const getCartItems = createAsyncThunk<CartItem[]>(
+  'cart/getCartItems',
+  async (_, thunkAPI) => {
+    try {
+      // 전체 store에 접근 가능
+      // console.log(thunkAPI.getState());
+      // 해당 파일의 slice 외에도 모든 reducer를 실행 할 수 있음
+      // thunkAPI.dispatch(toggleModal());
+      const resp = await axios.get(url);
+      return resp.data;
+    } catch (error) {
+      // 해당 메세지를 payload로 받을 수 있음
+      return thunkAPI.rejectWithValue('💩 something went wrong');
+    }
+  }
+);
+
 const initialState: CartState = {
-  cartItems: cartItems,
-  amount: 4,
+  cartItems: [],
+  amount: 0,
   total: 0,
   isLoading: true,
 };
 
 const cartSlice = createSlice({
-  name: "cart",
+  name: 'cart',
   initialState,
   reducers: {
     clearCart: (cartState) => {
@@ -51,6 +71,20 @@ const cartSlice = createSlice({
         0
       );
     },
+  },
+  extraReducers(builder) {
+    builder
+      .addCase(getCartItems.pending, (cartState, _) => {
+        cartState.isLoading = true;
+      })
+      .addCase(getCartItems.fulfilled, (cartState, action) => {
+        cartState.isLoading = false;
+        cartState.cartItems = action.payload;
+      })
+      .addCase(getCartItems.rejected, (cartState, action) => {
+        console.log(action.payload);
+        cartState.isLoading = false;
+      });
   },
 });
 

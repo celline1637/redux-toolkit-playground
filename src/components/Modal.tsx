@@ -1,6 +1,7 @@
 import { useAppDispatch, useAppSelector } from "../hooks/useRedux";
 import { clearCart } from "../redux/feature/cart/cartSlice";
 import { toggleModal } from "../redux/feature/modal/modalSlice";
+
 const Modal = () => {
   const dispatch = useAppDispatch();
   const { amount } = useAppSelector((store) => store.cart);
